@@ -31,10 +31,10 @@ public class CommandMixin {
     @Shadow @Final private static DynamicCommandExceptionType FAILED_ENTITY_EXCEPTION;
     @Shadow @Final private static SimpleCommandExceptionType FAILED_EXCEPTION;
 
-    @Inject(method = "execute", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "execute", at = @At("HEAD"), cancellable = true, order = -999)
     private static void execute(ServerCommandSource source, Collection<? extends Entity> targets,
-                              RegistryEntry<Enchantment> enchantment, int level,
-                              CallbackInfoReturnable<Integer> cir) throws CommandSyntaxException {
+                                RegistryEntry<Enchantment> enchantment, int level,
+                                CallbackInfoReturnable<Integer> cir) throws CommandSyntaxException {
         int i = 0;
         Enchantment enchantment2 = enchantment.value();
 

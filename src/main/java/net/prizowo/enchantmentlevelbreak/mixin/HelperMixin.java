@@ -11,12 +11,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EnchantmentHelper.class)
 public class HelperMixin {
-    @Inject(method = "getLevelFromNbt", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getLevelFromNbt", at = @At("HEAD"), cancellable = true, order = -999)
     private static void onGetLevelFromNbt(NbtCompound nbt, CallbackInfoReturnable<Integer> cir) {
         cir.setReturnValue(nbt.getInt("lvl"));
     }
 
-    @Inject(method = "createNbt", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "createNbt", at = @At("HEAD"), cancellable = true, order = -999)
     private static void onCreateNbt(Identifier id, int level, CallbackInfoReturnable<NbtCompound> cir) {
         NbtCompound nbt = new NbtCompound();
         nbt.putString("id", id.toString());

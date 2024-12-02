@@ -10,20 +10,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Enchantment.class)
 public class EnchantmentMixin {
-    @Inject(method = "getName", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getName", at = @At("RETURN"), cancellable = true, order = -999)
     private void onGetName(int level, CallbackInfoReturnable<Text> cir) {
         Text originalName = cir.getReturnValue();
         String modifiedName = originalName.getString().replaceAll("enchantment\\.level\\.\\d+", String.valueOf(level));
         cir.setReturnValue(Text.literal(modifiedName));
     }
 
-    @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true, order = -999)
     private void onIsAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
         cir.cancel();
     }
 
-    @Inject(method = "canCombine", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "canCombine", at = @At("HEAD"), cancellable = true, order = -999)
     private void onCanCombine(Enchantment other, CallbackInfoReturnable<Boolean> cir) {
         cir.setReturnValue(true);
         cir.cancel();

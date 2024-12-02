@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
-    @Inject(method = "addEnchantment", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "addEnchantment", at = @At("HEAD"), cancellable = true, order = -999)
     private void onAddEnchantment(Enchantment enchantment, int level, CallbackInfo ci) {
         ItemStack stack = (ItemStack)(Object)this;
         NbtList enchantments = stack.getEnchantments();
@@ -23,3 +23,4 @@ public class ItemStackMixin {
         ci.cancel();
     }
 }
+
