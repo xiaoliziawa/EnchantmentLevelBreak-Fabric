@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "enchantmentlevelbreak",
+  "version": "${version}",
+
+  "name": "EnchantmentLevelBreak",
+  "description": "This is a test mod",
+  "authors": [],
+  "contact": {},
+
+  "license": "GPL-3.0",
+  "icon": "assets/enchantmentlevelbreak/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": ["net.prizowo.enchantmentlevelbreak.client.EnchantmentlevelbreakClient"],
+    "main": ["net.prizowo.enchantmentlevelbreak.Enchantmentlevelbreak"]
+  },
+
+  "mixins": [
+    "enchantmentlevelbreak.mixins.json"
+    ,{
+      "config": "enchantmentlevelbreak.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
