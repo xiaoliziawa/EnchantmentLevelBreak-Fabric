@@ -3,6 +3,7 @@ package net.prizowo.enchantmentlevelbreak.mixin;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
+import net.prizowo.enchantmentlevelbreak.config.ModConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,13 +20,17 @@ public class EnchantmentMixin {
 
     @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true, order = -999)
     private void onIsAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(true);
-        cir.cancel();
+        if (ModConfig.getInstance().allowEnchantAllItems) {
+            cir.setReturnValue(true);
+            cir.cancel();
+        }
     }
 
     @Inject(method = "canCombine", at = @At("HEAD"), cancellable = true, order = -999)
     private void onCanCombine(Enchantment other, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(true);
-        cir.cancel();
+        if (ModConfig.getInstance().allowAllEnchantmentsCombine) {
+            cir.setReturnValue(true);
+            cir.cancel();
+        }
     }
 }
