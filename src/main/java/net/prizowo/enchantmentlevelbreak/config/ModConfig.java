@@ -67,8 +67,8 @@ public class ModConfig {
             try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_PATH)) {
                 props.store(writer, """
                     EnchantmentLevelBreak Configuration
-                    allowEnchantAllItems: 是否允许对任意物品进行附魔
-                    allowAllEnchantmentsCombine: 是否允许所有附魔互相组合""");
+                    allowEnchantAllItems: Allow enchanting any item with any enchantment
+                    allowAllEnchantmentsCombine: Allow all enchantments to be combined""");
             }
         } catch (IOException e) {
             e.printStackTrace();
