@@ -62,7 +62,7 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
         ItemStack right = this.input.getStack(1);
 
         if (!left.isEmpty() && !right.isEmpty()) {
-            // 如果左边是附魔书，右边不是附魔书，不许合并
+            // 如果左边是附魔书，右边不是附魔书，不合并
             // 喜欢我的锋利10附魔书+锋利10合金剑=锋利20附魔书吗😋
             if (left.isOf(Items.ENCHANTED_BOOK) && !right.isOf(Items.ENCHANTED_BOOK)) {
                 return;

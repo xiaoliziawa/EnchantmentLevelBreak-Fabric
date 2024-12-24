@@ -44,7 +44,7 @@ public class CEnchantCommand {
             ItemStack itemStack = player.getMainHandStack();
 
             if (itemStack.isEmpty()) {
-                source.sendError(Text.literal("你必须手持一个物品来附魔"));
+                source.sendError(Text.literal("You must hold an item to enchant"));
                 return 0;
             }
 
@@ -60,7 +60,7 @@ public class CEnchantCommand {
             String fullName = enchantmentName.contains(":") ? enchantmentName : "minecraft:" + enchantmentName;
             Identifier enchantmentId = Identifier.tryParse(fullName);
             if (enchantmentId == null) {
-                source.sendError(Text.literal("无效的附魔ID: " + fullName));
+                source.sendError(Text.literal("Invalid Enchanting ID: " + fullName));
                 return 0;
             }
 
@@ -69,17 +69,17 @@ public class CEnchantCommand {
             RegistryEntry<Enchantment> enchantmentEntry = registry.getEntry(enchantmentId).orElse(null);
 
             if (enchantmentEntry == null) {
-                source.sendError(Text.literal("无效的附魔: " + enchantmentName));
+                source.sendError(Text.literal("Invalid enchantment: " + enchantmentName));
                 return 0;
             }
 
             itemStack.addEnchantment(enchantmentEntry, level);
             int finalLevel = level;
-            source.sendFeedback(() -> Text.literal("已将 " + Enchantment.getName(enchantmentEntry, finalLevel).getString() + " 附魔应用到物品上"), true);
+            source.sendFeedback(() -> Text.literal("Already" + Enchantment.getName(enchantmentEntry, finalLevel).getString() + "enchantment has been applied to the item"), true);
 
             return 1;
         } catch (Exception e) {
-            source.sendError(Text.literal("执行命令时发生错误: " + e.getMessage()));
+            source.sendError(Text.literal("An error occurred while executing the command: " + e.getMessage()));
             return 0;
         }
     }
