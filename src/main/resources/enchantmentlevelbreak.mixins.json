@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.prizowo.enchantmentlevelbreak.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "Command",
+    "EnchantmentDisplayMixin",
+    "AnvilMenuMixin",
+    "EnchantmentHelperMixin",
+    "Helper",
+    "ItemEnchantmentsConstructorMixin",
+    "ItemEnchantmentsMixin",
+    "ItemStackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
