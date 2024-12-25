@@ -75,7 +75,7 @@ public class CEnchantCommand {
 
             itemStack.addEnchantment(enchantmentEntry, level);
             int finalLevel = level;
-            source.sendFeedback(() -> Text.literal("Already" + Enchantment.getName(enchantmentEntry, finalLevel).getString() + "enchantment has been applied to the item"), true);
+            source.sendFeedback(() -> Text.literal("Already " + Enchantment.getName(enchantmentEntry, finalLevel).getString() + " enchantment has been applied to the item"), true);
 
             return 1;
         } catch (Exception e) {
