@@ -3,7 +3,7 @@
   "id": "enchantmentlevelbreak",
   "version": "${version}",
   "name": "Enchantmentlevelbreak",
-  "description": "A Mod that makes it easy for players to fly",
+  "description": "Players can enchant any enchantment beyond the original 255 limit",
   "authors": [],
   "contact": {},
   "license": "LGPL-3.0",
