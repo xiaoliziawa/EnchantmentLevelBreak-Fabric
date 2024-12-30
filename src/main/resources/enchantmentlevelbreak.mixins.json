@@ -4,6 +4,7 @@
   "package": "net.prizowo.enchantmentlevelbreak.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AnvilMenuMixin",
     "CommandMixin",
     "EnchantmentMixin",
     "HelperMixin",

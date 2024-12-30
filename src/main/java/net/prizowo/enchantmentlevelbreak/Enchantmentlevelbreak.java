@@ -1,8 +1,8 @@
 package net.prizowo.enchantmentlevelbreak;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.prizowo.enchantmentlevelbreak.command.CEnchantCommand;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.prizowo.enchantmentlevelbreak.config.ModConfig;
 
 public class Enchantmentlevelbreak implements ModInitializer {
@@ -10,8 +10,6 @@ public class Enchantmentlevelbreak implements ModInitializer {
     public void onInitialize() {
         ModConfig.load();
         
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            CEnchantCommand.register(dispatcher);
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CEnchantCommand.register(dispatcher));
     }
 }

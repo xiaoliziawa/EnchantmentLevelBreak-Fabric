@@ -13,6 +13,8 @@ public class ModConfig {
 
     public boolean allowEnchantAllItems = false;
     public boolean allowAllEnchantmentsCombine = false;
+    public boolean useRomanNumerals = true;  // 默认使用罗马数字
+    public int romanNumeralsLimit = 5000;    // 默认5000以下使用罗马数字
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -23,19 +25,25 @@ public class ModConfig {
 
     public static void load() {
         INSTANCE = new ModConfig();
-        
+
         try {
             if (Files.exists(CONFIG_PATH)) {
                 Properties props = new Properties();
                 try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
                     props.load(reader);
                 }
-                
+
                 INSTANCE.allowEnchantAllItems = Boolean.parseBoolean(
-                    props.getProperty("allowEnchantAllItems", "false")
+                        props.getProperty("allowEnchantAllItems", "false")
                 );
                 INSTANCE.allowAllEnchantmentsCombine = Boolean.parseBoolean(
-                    props.getProperty("allowAllEnchantmentsCombine", "false")
+                        props.getProperty("allowAllEnchantmentsCombine", "false")
+                );
+                INSTANCE.useRomanNumerals = Boolean.parseBoolean(
+                        props.getProperty("useRomanNumerals", "true")
+                );
+                INSTANCE.romanNumeralsLimit = Integer.parseInt(
+                        props.getProperty("romanNumeralsLimit", "5000")
                 );
             } else {
                 save();
@@ -50,7 +58,7 @@ public class ModConfig {
             if (!Files.exists(CONFIG_PATH)) {
                 Files.createDirectories(CONFIG_PATH.getParent());
             }
-            
+
             Properties props = new Properties() {
                 @Override
                 public synchronized void store(Writer writer, String comments) throws IOException {
@@ -60,18 +68,22 @@ public class ModConfig {
                     }
                 }
             };
-            
+
             props.setProperty("allowEnchantAllItems", String.valueOf(INSTANCE.allowEnchantAllItems));
             props.setProperty("allowAllEnchantmentsCombine", String.valueOf(INSTANCE.allowAllEnchantmentsCombine));
-            
+            props.setProperty("useRomanNumerals", String.valueOf(INSTANCE.useRomanNumerals));
+            props.setProperty("romanNumeralsLimit", String.valueOf(INSTANCE.romanNumeralsLimit));
+
             try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_PATH)) {
                 props.store(writer, """
                     EnchantmentLevelBreak Configuration
                     allowEnchantAllItems: Allow enchanting any item with any enchantment
-                    allowAllEnchantmentsCombine: Allow all enchantments to be combined""");
+                    allowAllEnchantmentsCombine: Allow all enchantments to be combined
+                    useRomanNumerals: Use Roman numerals for enchantment levels
+                    romanNumeralsLimit: Maximum level to display as Roman numerals (higher levels will use Arabic numerals)""");
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-} 
+}
