@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.prizowo.enchantmentlevelbreak.mixin",
   "compatibilityLevel": "JAVA_21",
+  "refmap": "enchantmentlevelbreak.refmap.json",
   "mixins": [
     "AnvilMenuMixin",
     "Command",
@@ -13,6 +14,7 @@
     "ItemEnchantmentsMixin",
     "ItemStackMixin"
   ],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }
