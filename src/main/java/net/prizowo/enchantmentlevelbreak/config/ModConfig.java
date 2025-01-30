@@ -14,6 +14,8 @@ public class ModConfig {
     private static ModConfig INSTANCE;
 
     private boolean useRomanNumerals = true;
+    private boolean allowAnyEnchantment = false;
+    private boolean allowLevelStacking = false;
     private int romanNumeralsThreshold = 5000;
 
     public static ModConfig getInstance() {
@@ -27,12 +29,30 @@ public class ModConfig {
         return useRomanNumerals;
     }
 
+    public boolean isAllowAnyEnchantment() {
+        return allowAnyEnchantment;
+    }
+
+    public boolean isAllowLevelStacking() {
+        return allowLevelStacking;
+    }
+
     public int getRomanNumeralsThreshold() {
         return romanNumeralsThreshold;
     }
 
     public void setUseRomanNumerals(boolean useRomanNumerals) {
         this.useRomanNumerals = useRomanNumerals;
+        save();
+    }
+
+    public void setAllowAnyEnchantment(boolean allowAnyEnchantment) {
+        this.allowAnyEnchantment = allowAnyEnchantment;
+        save();
+    }
+
+    public void setAllowLevelStacking(boolean allowLevelStacking) {
+        this.allowLevelStacking = allowLevelStacking;
         save();
     }
 
