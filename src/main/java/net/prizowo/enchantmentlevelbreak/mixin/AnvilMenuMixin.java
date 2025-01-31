@@ -26,17 +26,19 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
     }
 
     @Unique
-    private boolean canCombineEnchantments(Enchantment newEnchant, Map<Enchantment, Integer> existingEnchants) {
-        if (ModConfig.getInstance().allowAllEnchantmentsCombine) {
+    private boolean canEnchant(ItemStack item, Enchantment enchantment) {
+        return item.isOf(Items.ENCHANTED_BOOK) ||
+                ModConfig.getInstance().isAllowAnyEnchantment() ||
+                enchantment.isAcceptableItem(item);
+    }
+
+    @Unique
+    private boolean isEnchantmentCompatible(Enchantment newEnchant, Map<Enchantment, Integer> existingEnchants) {
+        if (ModConfig.getInstance().isAllowAnyEnchantment()) {
             return true;
         }
         return existingEnchants.keySet().stream()
                 .allMatch(existing -> newEnchant == existing || newEnchant.canCombine(existing));
-    }
-
-    @Unique
-    private boolean canAcceptEnchantment(ItemStack stack, Enchantment enchantment) {
-        return ModConfig.getInstance().allowEnchantAllItems || enchantment.isAcceptableItem(stack);
     }
 
     @Inject(method = "updateResult", at = @At("HEAD"), cancellable = true)
@@ -44,8 +46,7 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
         ItemStack left = this.input.getStack(0);
         ItemStack right = this.input.getStack(1);
 
-        if (left.isEmpty() || right.isEmpty() ||
-                (left.isOf(Items.ENCHANTED_BOOK) && !right.isOf(Items.ENCHANTED_BOOK))) {
+        if (!isValidAnvilOperation(left, right)) {
             return;
         }
 
@@ -54,32 +55,52 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
 
         if (!rightEnchants.isEmpty() || right.isOf(Items.ENCHANTED_BOOK)) {
             ItemStack result = left.copy();
-            Map<Enchantment, Integer> resultEnchants = EnchantmentHelper.get(result);
 
-            boolean canApplyAll = rightEnchants.entrySet().stream().allMatch(entry ->
-                    canAcceptEnchantment(result, entry.getKey()) &&
-                            canCombineEnchantments(entry.getKey(), leftEnchants)
-            );
+            boolean anyEnchantmentApplied = false;
+            for (Map.Entry<Enchantment, Integer> entry : rightEnchants.entrySet()) {
+                Enchantment enchantment = entry.getKey();
+                int rightLevel = entry.getValue();
 
-            if (!canApplyAll) {
-                return;
+                if (!canEnchant(result, enchantment) || !isEnchantmentCompatible(enchantment, leftEnchants)) {
+                    continue;
+                }
+
+                int leftLevel = leftEnchants.getOrDefault(enchantment, 0);
+                int newLevel = calculateNewLevel(leftLevel, rightLevel);
+                
+                leftEnchants.put(enchantment, newLevel);
+                anyEnchantmentApplied = true;
             }
 
-            rightEnchants.forEach((enchantment, rightLevel) -> {
-                int leftLevel = leftEnchants.getOrDefault(enchantment, 0);
-                resultEnchants.put(enchantment, leftLevel > 0 ? leftLevel + rightLevel : rightLevel);
-            });
-
-            if (!resultEnchants.isEmpty()) {
-                EnchantmentHelper.set(resultEnchants, result);
+            if (anyEnchantmentApplied) {
+                EnchantmentHelper.set(leftEnchants, result);
                 this.output.setStack(0, result);
 
-                int totalCost = rightEnchants.values().stream().mapToInt(Integer::intValue).sum();
+                // Calculate experience cost
+                int totalCost = leftEnchants.values().stream().mapToInt(Integer::intValue).sum();
                 this.levelCost.set(Math.min(totalCost, 50));
                 this.repairItemUsage = 1;
-
                 ci.cancel();
             }
         }
+    }
+
+    @Unique
+    private boolean isValidAnvilOperation(ItemStack left, ItemStack right) {
+        return !left.isEmpty() && !right.isEmpty() &&
+                !(left.isOf(Items.ENCHANTED_BOOK) && !right.isOf(Items.ENCHANTED_BOOK));
+    }
+
+    @Unique
+    private int calculateNewLevel(int leftLevel, int rightLevel) {
+        if (leftLevel <= 0) {
+            return rightLevel;
+        }
+
+        if (ModConfig.getInstance().isAllowLevelStacking()) {
+            return leftLevel + rightLevel;
+        }
+
+        return leftLevel == rightLevel ? leftLevel + 1 : Math.max(leftLevel, rightLevel);
     }
 }
