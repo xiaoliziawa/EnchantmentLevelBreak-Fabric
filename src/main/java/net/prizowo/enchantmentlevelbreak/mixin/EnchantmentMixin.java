@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
 import net.prizowo.enchantmentlevelbreak.config.ModConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,8 +20,6 @@ public class EnchantmentMixin {
     private static final int[] ROMAN_VALUES = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
     @Unique
     private static final String[] ROMAN_SYMBOLS = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-    @Unique
-    private static final Style LEVEL_STYLE = Style.EMPTY.withColor(Formatting.GRAY).withItalic(true);
 
     @Unique
     private static String toRoman(int number) {
@@ -40,29 +39,38 @@ public class EnchantmentMixin {
         Enchantment enchantment = (Enchantment) (Object) this;
         ModConfig config = ModConfig.getInstance();
 
-        String enchantName = Text.translatable(enchantment.getTranslationKey()).getString();
+        MutableText name = Text.translatable(enchantment.getTranslationKey());
+        
+        // Set style based on whether it's a curse
+        if (((Enchantment) (Object) this).isCursed()) {
+            name.setStyle(Style.EMPTY.withColor(Formatting.RED));
+        } else {
+            name.setStyle(Style.EMPTY.withColor(Formatting.GRAY));
+        }
 
-        String levelText = config.useRomanNumerals && level <= config.romanNumeralsLimit
-                ? toRoman(level)
-                : String.valueOf(level);
+        if (level != 1) {
+            name.append(" ");
+            if (config.isUseRomanNumerals() && level <= config.getRomanNumeralsThreshold()) {
+                name.append(toRoman(level));
+            } else {
+                name.append(String.valueOf(level));
+            }
+        }
 
-        MutableText nameText = Text.literal(enchantName);
-        MutableText levelPart = Text.literal(" " + levelText).setStyle(LEVEL_STYLE);
-
-        cir.setReturnValue(nameText.append(levelPart));
+        cir.setReturnValue(name);
         cir.cancel();
     }
 
     @Inject(method = "isAcceptableItem", at = @At("HEAD"), cancellable = true)
     private void onIsAcceptableItem(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (ModConfig.getInstance().allowEnchantAllItems) {
+        if (ModConfig.getInstance().isAllowAnyEnchantment()) {
             cir.setReturnValue(true);
         }
     }
 
     @Inject(method = "canCombine", at = @At("HEAD"), cancellable = true)
     private void onCanCombine(Enchantment other, CallbackInfoReturnable<Boolean> cir) {
-        if (ModConfig.getInstance().allowAllEnchantmentsCombine) {
+        if (ModConfig.getInstance().isAllowAnyEnchantment()) {
             cir.setReturnValue(true);
         }
     }

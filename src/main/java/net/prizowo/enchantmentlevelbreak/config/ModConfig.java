@@ -1,20 +1,22 @@
 package net.prizowo.enchantmentlevelbreak.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
 public class ModConfig {
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("enchantmentlevelbreak.properties");
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("enchantmentlevelbreak.json");
     private static ModConfig INSTANCE;
 
-    public boolean allowEnchantAllItems = false;
-    public boolean allowAllEnchantmentsCombine = false;
-    public boolean useRomanNumerals = true;  // 默认使用罗马数字
-    public int romanNumeralsLimit = 5000;    // 默认5000以下使用罗马数字
+    private boolean useRomanNumerals = true;
+    private boolean allowAnyEnchantment = false;
+    private boolean allowLevelStacking = false;
+    private int romanNumeralsThreshold = 5000;
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -23,67 +25,66 @@ public class ModConfig {
         return INSTANCE;
     }
 
-    public static void load() {
-        INSTANCE = new ModConfig();
+    public boolean isUseRomanNumerals() {
+        return useRomanNumerals;
+    }
 
+    public boolean isAllowAnyEnchantment() {
+        return allowAnyEnchantment;
+    }
+
+    public boolean isAllowLevelStacking() {
+        return allowLevelStacking;
+    }
+
+    public int getRomanNumeralsThreshold() {
+        return romanNumeralsThreshold;
+    }
+
+    public void setUseRomanNumerals(boolean useRomanNumerals) {
+        this.useRomanNumerals = useRomanNumerals;
+        save();
+    }
+
+    public void setAllowAnyEnchantment(boolean allowAnyEnchantment) {
+        this.allowAnyEnchantment = allowAnyEnchantment;
+        save();
+    }
+
+    public void setAllowLevelStacking(boolean allowLevelStacking) {
+        this.allowLevelStacking = allowLevelStacking;
+        save();
+    }
+
+    public void setRomanNumeralsThreshold(int threshold) {
+        this.romanNumeralsThreshold = threshold;
+        save();
+    }
+
+    public static void load() {
         try {
             if (Files.exists(CONFIG_PATH)) {
-                Properties props = new Properties();
                 try (Reader reader = Files.newBufferedReader(CONFIG_PATH)) {
-                    props.load(reader);
+                    INSTANCE = GSON.fromJson(reader, ModConfig.class);
                 }
-
-                INSTANCE.allowEnchantAllItems = Boolean.parseBoolean(
-                        props.getProperty("allowEnchantAllItems", "false")
-                );
-                INSTANCE.allowAllEnchantmentsCombine = Boolean.parseBoolean(
-                        props.getProperty("allowAllEnchantmentsCombine", "false")
-                );
-                INSTANCE.useRomanNumerals = Boolean.parseBoolean(
-                        props.getProperty("useRomanNumerals", "true")
-                );
-                INSTANCE.romanNumeralsLimit = Integer.parseInt(
-                        props.getProperty("romanNumeralsLimit", "5000")
-                );
             } else {
-                save();
+                INSTANCE = new ModConfig();
+                INSTANCE.save();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to load config: " + e.getMessage());
+            INSTANCE = new ModConfig();
         }
     }
 
-    public static void save() {
+    private void save() {
         try {
-            if (!Files.exists(CONFIG_PATH)) {
-                Files.createDirectories(CONFIG_PATH.getParent());
-            }
-
-            Properties props = new Properties() {
-                @Override
-                public synchronized void store(Writer writer, String comments) throws IOException {
-                    writer.write("#" + comments.replace("\n", "\n#") + "\n");
-                    for (String key : stringPropertyNames()) {
-                        writer.write(key + "=" + getProperty(key) + "\n");
-                    }
-                }
-            };
-
-            props.setProperty("allowEnchantAllItems", String.valueOf(INSTANCE.allowEnchantAllItems));
-            props.setProperty("allowAllEnchantmentsCombine", String.valueOf(INSTANCE.allowAllEnchantmentsCombine));
-            props.setProperty("useRomanNumerals", String.valueOf(INSTANCE.useRomanNumerals));
-            props.setProperty("romanNumeralsLimit", String.valueOf(INSTANCE.romanNumeralsLimit));
-
-            try (BufferedWriter writer = Files.newBufferedWriter(CONFIG_PATH)) {
-                props.store(writer, """
-                    EnchantmentLevelBreak Configuration
-                    allowEnchantAllItems: Allow enchanting any item with any enchantment
-                    allowAllEnchantmentsCombine: Allow all enchantments to be combined
-                    useRomanNumerals: Use Roman numerals for enchantment levels
-                    romanNumeralsLimit: Maximum level to display as Roman numerals (higher levels will use Arabic numerals)""");
+            Files.createDirectories(CONFIG_PATH.getParent());
+            try (Writer writer = Files.newBufferedWriter(CONFIG_PATH)) {
+                GSON.toJson(this, writer);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to save config: " + e.getMessage());
         }
     }
 }
