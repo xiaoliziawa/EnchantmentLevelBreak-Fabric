@@ -17,6 +17,7 @@ public class ModConfig {
     private boolean allowAnyEnchantment = false;
     private boolean allowLevelStacking = false;
     private int romanNumeralsThreshold = 5000;
+    private int maxEnchantmentLevel = 2147483647;
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -41,6 +42,10 @@ public class ModConfig {
         return romanNumeralsThreshold;
     }
 
+    public int getMaxEnchantmentLevel() {
+        return maxEnchantmentLevel;
+    }
+
     public void setUseRomanNumerals(boolean useRomanNumerals) {
         this.useRomanNumerals = useRomanNumerals;
         save();
@@ -58,6 +63,16 @@ public class ModConfig {
 
     public void setRomanNumeralsThreshold(int threshold) {
         this.romanNumeralsThreshold = threshold;
+        save();
+    }
+
+    public void setMaxEnchantmentLevel(int level) {
+        if (level < 255) {
+            level = 255;
+        } else if (level > 2147483647) {
+            level = 2147483647;
+        }
+        this.maxEnchantmentLevel = level;
         save();
     }
 
