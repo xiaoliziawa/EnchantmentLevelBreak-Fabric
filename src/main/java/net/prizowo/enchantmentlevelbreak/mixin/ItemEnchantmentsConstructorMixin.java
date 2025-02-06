@@ -1,6 +1,7 @@
 package net.prizowo.enchantmentlevelbreak.mixin;
 
 import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.prizowo.enchantmentlevelbreak.config.ModConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
@@ -9,11 +10,11 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class ItemEnchantmentsConstructorMixin {
     @ModifyConstant(method = "set", constant = @Constant(intValue = 255))
     private int modifySetMaxLevel(int value) {
-        return Integer.MAX_VALUE;
+        return ModConfig.getInstance().getMaxEnchantmentLevel();
     }
 
     @ModifyConstant(method = "add", constant = @Constant(intValue = 255))
     private int modifyAddMaxLevel(int value) {
-        return Integer.MAX_VALUE;
+        return ModConfig.getInstance().getMaxEnchantmentLevel();
     }
 }
