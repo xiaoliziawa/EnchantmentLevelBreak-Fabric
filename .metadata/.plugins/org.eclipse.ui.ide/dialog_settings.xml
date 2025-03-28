@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="SmartImportWizard">
+		<item key="SmartImportRootWizardPage.STORE_HIDE_ALREADY_OPEN" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_CLOSE_IMPORTED" value="false"/>
+		<item key="SmartImportRootWizardPage.STORE_NESTED_PROJECTS" value="true"/>
+		<item key="SmartImportRootWizardPage.STORE_CONFIGURE_NATURES" value="true"/>
+		<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+			<item value="G:\IDEA Project BACKUP\Enchantmentlevelbreak-1.21.4-Fabric"/>
+		</list>
+		<section name="SmartImportWizard.dialogBounds">
+			<item key="DIALOG_X_ORIGIN" value="782"/>
+			<item key="DIALOG_Y_ORIGIN" value="191"/>
+			<item key="DIALOG_WIDTH" value="1019"/>
+			<item key="DIALOG_HEIGHT" value="810"/>
+			<item key="DIALOG_FONT_NAME" value="1|微软雅黑|9.0|0|WINDOWS|1|-18|0|0|0|400|0|0|0|-122|0|0|0|34|微软雅黑"/>
+		</section>
+	</section>
+</section>
