@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "enchantmentlevelbreak",
+  "version": "${version}",
+  "name": "EnchantmentLevelBreak",
+  "description": "Allows two players to mount the same horse.",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/enchantmentlevelbreak/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "com.lirxowo.enchantmentlevelbreak.client.EnchantmentlevelbreakDataGenerator"
+    ],
+    "client": [
+      "com.lirxowo.enchantmentlevelbreak.client.EnchantmentlevelbreakClient"
+    ],
+    "main": [
+      "com.lirxowo.enchantmentlevelbreak.Enchantmentlevelbreak"
+    ]
+  },
+  "mixins": [
+    "enchantmentlevelbreak.mixins.json",
+    {
+      "config": "enchantmentlevelbreak.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": ">=1.21.5 <=1.21.8"
+  }
+}
