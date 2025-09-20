@@ -2,5 +2,6 @@
   "command.enchantmentlevelbreak.cenchant.no_item": "You must hold an item to enchant",
   "command.enchantmentlevelbreak.cenchant.invalid_enchantment": "Invalid enchantment: %s",
   "command.enchantmentlevelbreak.cenchant.success": "Successfully applied %s to the item",
-  "command.enchantmentlevelbreak.cenchant.error": "Error executing command: %s"
-} 
+  "command.enchantmentlevelbreak.cenchant.error": "Error executing command: %s",
+  "command.enchantmentlevelbreak.cenchant.level_too_high": "Enchantment level is too high (max: %s)"
+}
