@@ -3,6 +3,7 @@ package net.prizowo.enchantmentlevelbreak;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.prizowo.enchantmentlevelbreak.config.ModConfig;
+import net.prizowo.enchantmentlevelbreak.command.CEnchantCommand;
 
 public class Enchantmentlevelbreak implements ModInitializer {
     public static final String MODID = "enchantmentlevelbreak";

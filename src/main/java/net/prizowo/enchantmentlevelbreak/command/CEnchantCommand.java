@@ -1,4 +1,4 @@
-package net.prizowo.enchantmentlevelbreak;
+package net.prizowo.enchantmentlevelbreak.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -44,7 +44,7 @@ public class CEnchantCommand {
             ItemStack itemStack = player.getMainHandStack();
 
             if (itemStack.isEmpty()) {
-                source.sendError(Text.literal("You must hold an item to enchant"));
+                source.sendError(Text.translatable("command.enchantmentlevelbreak.cenchant.no_item"));
                 return 0;
             }
 
@@ -52,15 +52,26 @@ public class CEnchantCommand {
             String enchantmentName = parts[0];
             if (parts.length > 1) {
                 try {
-                    level = Integer.parseInt(parts[1]);
+                    long longLevel = Long.parseLong(parts[1]);
+                    if (longLevel > Integer.MAX_VALUE) {
+                        source.sendError(Text.translatable("command.enchantmentlevelbreak.cenchant.level_too_high", Integer.MAX_VALUE));
+                        return 0;
+                    }
+                    level = (int) longLevel;
                 } catch (NumberFormatException ignored) {
                 }
+            }
+
+            // Check if level exceeds int max value
+            if (level > Integer.MAX_VALUE || level < 1) {
+                source.sendError(Text.translatable("command.enchantmentlevelbreak.cenchant.level_too_high", Integer.MAX_VALUE));
+                return 0;
             }
 
             String fullName = enchantmentName.contains(":") ? enchantmentName : "minecraft:" + enchantmentName;
             Identifier enchantmentId = Identifier.tryParse(fullName);
             if (enchantmentId == null) {
-                source.sendError(Text.literal("Invalid Enchanting ID: " + fullName));
+                source.sendError(Text.translatable("command.enchantmentlevelbreak.cenchant.invalid_enchantment", fullName));
                 return 0;
             }
 
@@ -69,13 +80,13 @@ public class CEnchantCommand {
             RegistryEntry<Enchantment> enchantmentEntry = registry.getEntry(enchantmentId).orElse(null);
 
             if (enchantmentEntry == null) {
-                source.sendError(Text.literal("Invalid enchantment: " + enchantmentName));
+                source.sendError(Text.translatable("command.enchantmentlevelbreak.cenchant.invalid_enchantment", enchantmentName));
                 return 0;
             }
 
             itemStack.addEnchantment(enchantmentEntry, level);
             int finalLevel = level;
-            source.sendFeedback(() -> Text.literal("Already " + Enchantment.getName(enchantmentEntry, finalLevel).getString() + " enchantment has been applied to the item"), true);
+            source.sendFeedback(() -> Text.translatable("command.enchantmentlevelbreak.cenchant.success", Enchantment.getName(enchantmentEntry, finalLevel)), true);
 
             return 1;
         } catch (Exception e) {
