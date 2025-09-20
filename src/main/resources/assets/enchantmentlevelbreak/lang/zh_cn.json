@@ -2,5 +2,6 @@
   "command.enchantmentlevelbreak.cenchant.no_item": "你必须手持一个物品来附魔",
   "command.enchantmentlevelbreak.cenchant.invalid_enchantment": "无效的附魔: %s",
   "command.enchantmentlevelbreak.cenchant.success": "已将 %s 附魔应用到物品上",
+  "command.enchantmentlevelbreak.cenchant.level_too_high": "附魔等级过高，最大等级为 %s",
   "command.enchantmentlevelbreak.cenchant.error": "执行命令时出错: %s"
 } 

@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -35,7 +36,7 @@ public class CEnchantCommand {
                                         IntegerArgumentType.getInteger(context, "level"))))));
     }
 
-    private static int enchantItem(CommandContext<ServerCommandSource> context, int level) {
+    private static int enchantItem(CommandContext<ServerCommandSource> context, int level) throws CommandSyntaxException {
         ServerPlayerEntity player = context.getSource().getPlayer();
         ItemStack itemStack = player.getMainHandStack();
 
@@ -44,12 +45,23 @@ public class CEnchantCommand {
             return 0;
         }
 
+        // check enchant level exceeds int max value.
+        if (level > Integer.MAX_VALUE || level < 1) {
+            context.getSource().sendError(Text.translatable(TRANSLATION_PREFIX + "level_too_high", Integer.MAX_VALUE));
+            return 0;
+        }
+
         String enchantmentInput = StringArgumentType.getString(context, "enchantment");
         String[] parts = enchantmentInput.split("\\s+", 2);
         String enchantmentName = parts[0];
         if (parts.length > 1) {
             try {
-                level = Integer.parseInt(parts[1]);
+                long longLevel = Long.parseLong(parts[1]);
+                if (longLevel > Integer.MAX_VALUE) {
+                    context.getSource().sendError(Text.translatable(TRANSLATION_PREFIX + "level_too_high", Integer.MAX_VALUE));
+                    return 0;
+                }
+                level = (int) longLevel;
             } catch (NumberFormatException ignored) {}
         }
 
@@ -63,10 +75,10 @@ public class CEnchantCommand {
         enchantments.put(enchantment, level);
         EnchantmentHelper.set(enchantments, itemStack);
 
-        int finalLevel = level;
+        final int finalLevel = level;
         context.getSource().sendFeedback(
-                () -> Text.translatable(TRANSLATION_PREFIX + "success", enchantment.getName(finalLevel)),
-                true
+            () -> Text.translatable(TRANSLATION_PREFIX + "success", enchantment.getName(finalLevel)),
+            true
         );
 
         return 1;
