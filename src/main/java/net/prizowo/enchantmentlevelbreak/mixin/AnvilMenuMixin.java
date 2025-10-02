@@ -40,53 +40,59 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
         ItemStack left = this.input.getStack(0);
         ItemStack right = this.input.getStack(1);
 
-        if (!isValidAnvilOperation(left, right)) {
+        if (!left.isEmpty() && !right.isEmpty()) {
+            handleAnvilOperation(left, right, ci);
+        }
+    }
+
+    @Unique
+    private void handleAnvilOperation(ItemStack left, ItemStack right, CallbackInfo ci) {
+        boolean sameItem = left.isOf(right.getItem());
+        boolean rightIsBook = right.isOf(Items.ENCHANTED_BOOK);
+
+        ItemEnchantmentsComponent leftEnchants = getEnchantments(left);
+        ItemEnchantmentsComponent rightEnchants = getEnchantments(right);
+
+        if (sameItem) {
+            if (!leftEnchants.isEmpty() || !rightEnchants.isEmpty()) {
+                handleEnchantmentMerge(left, leftEnchants, rightEnchants, true, ci);
+            }
             return;
         }
+        if (!rightEnchants.isEmpty() && (rightIsBook || !getEnchantments(right).isEmpty())) {
+            handleEnchantmentMerge(left, leftEnchants, rightEnchants, false, ci);
+        }
+    }
 
-        if (!getEnchantments(right).isEmpty() || right.isOf(Items.ENCHANTED_BOOK)) {
-            if (!canApplyAnyEnchantment(left, right)) {
-                return;
-            }
+    @Unique
+    private void handleEnchantmentMerge(ItemStack target, ItemEnchantmentsComponent leftEnchants, ItemEnchantmentsComponent rightEnchants, boolean isSameItemMerge, CallbackInfo ci) {
+        ItemStack result = target.copy();
+        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(leftEnchants);
+        boolean anyApplied = false;
+        int totalCost = 0;
 
-            ItemStack result = left.copy();
-            ItemEnchantmentsComponent leftEnchants = getEnchantments(left);
-            ItemEnchantmentsComponent rightEnchants = getEnchantments(right);
-            ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(leftEnchants);
+        for (var entry : rightEnchants.getEnchantmentEntries()) {
+            RegistryEntry<Enchantment> enchantment = entry.getKey();
+            int rightLevel = entry.getIntValue();
+            boolean canApply = isSameItemMerge || ModConfig.getInstance().isAllowAnyEnchantment() || enchantment.value().isAcceptableItem(target);
 
-            // 保留左边物品的所有附魔
-            for (var entry : leftEnchants.getEnchantmentEntries()) {
-                builder.set(entry.getKey(), entry.getIntValue());
-            }
-
-            // 合并右边物品的附魔
-            boolean anyEnchantmentApplied = false;
-            for (var entry : rightEnchants.getEnchantmentEntries()) {
-                RegistryEntry<Enchantment> enchantment = entry.getKey();
-                if (!canEnchant(left, enchantment) || !isEnchantmentCompatible(enchantment, leftEnchants)) {
-                    continue;
-                }
-
-                int newLevel = calculateNewLevel(leftEnchants.getLevel(enchantment), entry.getIntValue());
+            if (canApply) {
+                int leftLevel = leftEnchants.getLevel(enchantment);
+                int newLevel = calculateNewLevel(leftLevel, rightLevel);
+                newLevel = Math.min(newLevel, ModConfig.getInstance().getMaxEnchantmentLevel());
                 builder.set(enchantment, newLevel);
-                anyEnchantmentApplied = true;
+                totalCost += newLevel;
+                anyApplied = true;
             }
+        }
 
-            if (anyEnchantmentApplied) {
-                ItemEnchantmentsComponent newEnchants = builder.build();
-                setEnchantments(result, newEnchants);
-                this.output.setStack(0, result);
-
-                // 计算经验消耗
-                int totalCost = 0;
-                for (var entry : newEnchants.getEnchantmentEntries()) {
-                    totalCost += entry.getIntValue();
-                }
-
-                this.levelCost.set(Math.min(totalCost, 50));
-                this.repairItemUsage = 1;
-                ci.cancel();
-            }
+        if (anyApplied) {
+            ItemEnchantmentsComponent newEnchants = builder.build();
+            setEnchantments(result, newEnchants);
+            this.output.setStack(0, result);
+            this.repairItemUsage = Math.min(totalCost, 50);
+            this.levelCost.set(this.repairItemUsage);
+            ci.cancel();
         }
     }
 
@@ -102,61 +108,26 @@ public abstract class AnvilMenuMixin extends ForgingScreenHandler {
     private void setEnchantments(ItemStack stack, ItemEnchantmentsComponent enchantments) {
         if (stack.isOf(Items.ENCHANTED_BOOK)) {
             stack.set(DataComponentTypes.STORED_ENCHANTMENTS, enchantments);
+            if (stack.contains(DataComponentTypes.ENCHANTMENTS)) {
+                stack.remove(DataComponentTypes.ENCHANTMENTS);
+            }
         } else {
             stack.set(DataComponentTypes.ENCHANTMENTS, enchantments);
         }
     }
 
     @Unique
-    private boolean canEnchant(ItemStack item, RegistryEntry<Enchantment> enchantment) {
-        return item.isOf(Items.ENCHANTED_BOOK) ||
-                ModConfig.getInstance().isAllowAnyEnchantment() ||
-                enchantment.value().isAcceptableItem(item);
-    }
-
-    @Unique
-    private boolean isValidAnvilOperation(ItemStack left, ItemStack right) {
-        return !left.isEmpty() && !right.isEmpty() &&
-                !(left.isOf(Items.ENCHANTED_BOOK) && !right.isOf(Items.ENCHANTED_BOOK));
-    }
-
-    @Unique
-    private boolean canApplyAnyEnchantment(ItemStack target, ItemStack source) {
-        if (source.isOf(Items.ENCHANTED_BOOK)) {
-            return true;
-        }
-
-        ItemEnchantmentsComponent sourceEnchants = getEnchantments(source);
-        for (var entry : sourceEnchants.getEnchantmentEntries()) {
-            if (canEnchant(target, entry.getKey())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Unique
     private int calculateNewLevel(int leftLevel, int rightLevel) {
-        if (leftLevel <= 0) {
-            return rightLevel;
-        }
-
+        // 优先级: allowLevelStacking > allowVanillaLevelStacking
         if (ModConfig.getInstance().isAllowLevelStacking()) {
+            // allowLevelStacking为true时，直接相加 (5+5=10)
             return leftLevel + rightLevel;
+        } else if (ModConfig.getInstance().isAllowVanillaLevelStacking() && leftLevel == rightLevel) {
+            // allowVanillaLevelStacking为true且相同等级时，+1 (5+5=6)
+            return leftLevel + 1;
+        } else {
+            // 两个都为false时，使用原版机制，取最大值 (5+5=5)
+            return Math.max(leftLevel, rightLevel);
         }
-
-        return leftLevel == rightLevel ? leftLevel + 1 : Math.max(leftLevel, rightLevel);
-    }
-
-    @Unique
-    private boolean isEnchantmentCompatible(RegistryEntry<Enchantment> newEnchant, ItemEnchantmentsComponent existingEnchants) {
-        for (var existingEntry : existingEnchants.getEnchantmentEntries()) {
-            if (!newEnchant.equals(existingEntry.getKey()) &&
-                    !Enchantment.canBeCombined(newEnchant, existingEntry.getKey())) {
-                return false;
-            }
-        }
-        return true;
     }
 }
-
